@@ -5,7 +5,7 @@ import {
 
 export interface ComponentBuilder {
   import(toImport: string, from: string): ComponentBuilder;
-  build(): string;
+  build(): Promise<string>;
 }
 
 export abstract class BaseComponentBuilder implements ComponentBuilder {
@@ -16,7 +16,7 @@ export abstract class BaseComponentBuilder implements ComponentBuilder {
     return this;
   }
 
-  abstract build(): string;
+  abstract build(): Promise<string>;
 
   protected getImportStatements(): string {
     return this.importStatementCollection.getImportStatements();

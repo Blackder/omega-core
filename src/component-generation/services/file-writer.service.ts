@@ -10,7 +10,7 @@ export const FileWriterInjectionToken = 'FileWriter';
 
 export interface FileWriter {
   // Zip and return the zipped file path
-  zipFile(provider: OutputProvider, config: any): string;
+  zipFile(provider: OutputProvider, config: any):  Promise<string>;
 }
 
 @Injectable()
@@ -26,9 +26,9 @@ export class DefaultFileWriter implements FileWriter {
     });
   }
 
-  zipFile(provider: OutputProvider, config: any): string {
+  async zipFile(provider: OutputProvider, config: any): Promise<string> {
     let zip = new AdmZip();
-    let output = provider.getOutput(config);
+    let output = await provider.getOutput(config);
     let basePath = join(this.outputFolderPath, output.path);
 
     for (const file of output.files) {

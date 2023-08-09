@@ -24,13 +24,13 @@ export interface FileOutput {
 export const OutputProviderInjectionToken = 'OutputProvider';
 
 export interface OutputProvider {
-  getOutput(config: any): FolderOutput;
+  getOutput(config: any):  Promise<FolderOutput>;
 }
 
 export class AngularOutputProvider implements OutputProvider {
   constructor(private selectorPrefix: string) {}
 
-  getOutput(config: any): FolderOutput {
+  async getOutput(config: any): Promise<FolderOutput> {
     // The stuff that a component should import is irrelevant to the template and module import,
     // so we let the component build process use a separate ImportStatementCollection
     const componentBuildProcess = new AngularComponentBuildProcess(
@@ -39,7 +39,7 @@ export class AngularOutputProvider implements OutputProvider {
         new ImportStatementCollection(),
       ),
     );
-    const componentContent = componentBuildProcess.build(config);
+    const componentContent = await componentBuildProcess.build(config);
 
     // The stuff that the module must import is relevant to what is used in the template,
     // so they should share the same ImportStatementCollection,
@@ -53,12 +53,12 @@ export class AngularOutputProvider implements OutputProvider {
       ),
       importStatementCollection,
     );
-    const templateContent = templateBuildProcess.build(config);
+    const templateContent = await templateBuildProcess.build(config);
 
     const moduleBuildProcess = new AngularModuleBuildProcess(
       importStatementCollection,
     );
-    const moduleContent = moduleBuildProcess.build(config);
+    const moduleContent = await moduleBuildProcess.build(config);
 
     return {
       path: `./${config.name}`,

@@ -1,7 +1,7 @@
-enum BindingType {
+export enum BindingType {
   innerText = 'innerText',
   property = 'property',
-  twoWay = 'twoway',
+  twoWay = 'twoWay',
   event = 'event',
 }
 
@@ -19,6 +19,7 @@ interface Binding {
   type: BindingType;
   from: any;
   to?: any;
+  toType?: string;
   toValue?: any;
 }
 

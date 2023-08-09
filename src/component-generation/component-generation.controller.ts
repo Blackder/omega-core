@@ -15,13 +15,13 @@ export class ComponentGenerationController {
   ) {}
 
   @Post()
-  generate(config: string): StreamableFile {
+  async generate(config: string): Promise<StreamableFile> {
     let componentConfig = JSON.parse(config);
-    let filePath = this.fileWriter.zipFile(
+    let filePath = await this.fileWriter.zipFile(
       this.outputProviderResolver.resolve(componentConfig),
       componentConfig,
     );
     const file = createReadStream(join(process.cwd(), filePath));
-    return new StreamableFile(file);
+    return Promise.resolve(new StreamableFile(file));
   }
 }

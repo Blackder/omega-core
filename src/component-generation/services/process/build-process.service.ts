@@ -1,3 +1,3 @@
 export interface BuildProcess {
-    build(config): string;
+    build(config): Promise<string>;
 }
