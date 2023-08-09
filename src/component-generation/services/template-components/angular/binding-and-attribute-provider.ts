@@ -15,6 +15,13 @@ const nonAttributeKeys = [
   'export',
 ];
 
+interface Binding {
+  type: BindingType;
+  from: any;
+  to?: any;
+  toValue?: any;
+}
+
 export class BindingAndAttributeProvider {
   public getInnerTextBindings(config: any, isSelfClosed: boolean): string[] {
     if (!config.bindings) {
@@ -50,11 +57,17 @@ export class BindingAndAttributeProvider {
       )
       .map((b) =>
         b.type === BindingType.property
-          ? `[${b.from}]="${b.to}"`
+          ? this.getPropertyBinding(b)
           : b.type === BindingType.twoWay
           ? `[(${b.from})]="${b.to}"`
           : `(${b.from})="${b.to}"`,
       );
+  }
+
+  private getPropertyBinding(binding: Binding) {
+    return binding.to
+      ? `[${binding.from}]="${binding.to}"`
+      : `${binding.from}="${binding.toValue}"`;
   }
 
   private getAttributes(config: any): string[] {
