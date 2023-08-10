@@ -4,6 +4,7 @@ import { createWriteStream, rmSync } from 'fs';
 import AdmZip from 'adm-zip';
 import { ComponentGenerationModule } from './component-generation.module';
 import configModule from '../config.module';
+import { ServerResponse } from 'http';
 
 describe('ComponentGenerationController', () => {
   let controller: ComponentGenerationController;
@@ -30,56 +31,65 @@ describe('ComponentGenerationController', () => {
   });
 
   it('should generate correct zip file', async () => {
-    const file = await controller.generate(`{
-      "framework": "angular",
-      "name": "test-counter",
-      "export": true,
-      "inputs": [
-        {
-          "name": "initialValue",
-          "type": "number"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "increased",
-          "type": "Subject<number>"
-        }
-      ],
-      "children": [
-        {
-          "name": "p",
-          "bindings": [
-            {
-              "type": "innerText",
-              "to": "value",
-              "toType": "number"
-            }
-          ]
-        },
-        {
-          "name": "button",
-          "bindings": [
-            {
-              "type": "event",
-              "from": "click",
-              "to": "increaseValue()"
-            }
-          ]
-        },
-        {
-          "name": "app-footer",
-          "bindings": [
-            {
-              "type": "property",
-              "from": "text",
-              "to": "customText",
-              "toType": "string"
-            }
-          ]
-        }
-      ]
-    }`);
+    const response: Partial<ServerResponse> = {
+      setHeader: jest.fn().mockImplementation(),
+    };
+
+    const file = await controller.generate(
+      {
+        framework: 'angular',
+        name: 'test-counter',
+        export: true,
+        inputs: [
+          {
+            name: 'initialValue',
+            type: 'number',
+          },
+        ],
+        outputs: [
+          {
+            name: 'increased',
+            type: 'Subject<number>',
+          },
+        ],
+        children: [
+          {
+            name: 'p',
+            bindings: [
+              {
+                type: 'innerText',
+                to: 'value',
+                toType: 'number',
+              },
+            ],
+          },
+          {
+            name: 'button',
+            innerHtml: 'Increase',
+            bindings: [
+              {
+                type: 'event',
+                from: 'click',
+                to: 'increaseValue()',
+              },
+            ],
+          },
+          {
+            name: 'app-footer',
+            bindings: [
+              {
+                type: 'property',
+                from: 'text',
+                to: 'customText',
+                toType: 'string',
+              },
+            ],
+          },
+        ],
+      },
+      response as ServerResponse,
+    );
+
     const writeStream = createWriteStream('./test-component.zip');
     file.getStream().pipe(writeStream);
 
@@ -120,7 +130,7 @@ describe('ComponentGenerationController', () => {
             if (entry.entryName === 'test-counter.component.html') {
               compare(
                 `<p>{{ value }}</p>
-      <button (click)="increaseValue()"></button>
+      <button (click)="increaseValue()">Increase</button>
       <app-footer [text]="customText"> </app-footer>`,
                 entryContent,
               );
