@@ -13,6 +13,7 @@ const nonAttributeKeys = [
   'bindings',
   'framework',
   'export',
+  'innerHtml'
 ];
 
 interface Binding {

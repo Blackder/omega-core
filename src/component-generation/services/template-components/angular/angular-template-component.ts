@@ -60,8 +60,7 @@ export class AngularHtmlTemplateComponent extends AngularTemplateComponent {
       );
 
     if (this.isSelfClosed) {
-      return;
-      `<${this.config.name} ${
+      return `<${this.config.name} ${
         propertyBindingsAndAttributes.length > 0
           ? `${propertyBindingsAndAttributes.join(' ')}`
           : ''
@@ -70,7 +69,7 @@ export class AngularHtmlTemplateComponent extends AngularTemplateComponent {
 
     const innerHtml = `${
       innerTextBindings.length > 0 ? `${innerTextBindings.join(' ')}\n` : ''
-    }${
+    }${this.config.innerHtml ? this.config.innerHtml : ''}${
       this.children.length > 0
         ? this.children.map((c) => c.getTemplate()).join('\n')
         : ''
