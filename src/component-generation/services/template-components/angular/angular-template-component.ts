@@ -30,7 +30,7 @@ export class AngularHtmlTemplateComponent extends AngularTemplateComponent {
     super(importStatementCollection);
 
     this.isSelfClosed = this.isSelfClosedTag();
-    if (this.config.children) {
+    if (this.config.children && config.children.length > 0) {
       if (this.isSelfClosed) {
         throw new Error('Self-closed elements cannot have children.');
       }
@@ -69,14 +69,14 @@ export class AngularHtmlTemplateComponent extends AngularTemplateComponent {
 
     const innerHtml = `${
       innerTextBindings.length > 0 ? `${innerTextBindings.join(' ')}\n` : ''
-    }${this.config.innerHtml ? this.config.innerHtml : ''}${
+    }${this.config.value ? this.config.value : ''}${
       this.children.length > 0
         ? this.children.map((c) => c.getTemplate()).join('\n')
         : ''
     }`;
 
     // Don't include the root element
-    if (this.config.framework) {
+    if (this.config.componentName) {
       return innerHtml;
     }
 

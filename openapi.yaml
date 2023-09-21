@@ -1,0 +1,158 @@
+openapi: 3.0.0
+paths:
+  /component-generation/frameworks:
+    get:
+      operationId: getFrameworks
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+      tags:
+        - component-generation
+  "/component-generation/{framework}":
+    get:
+      operationId: getComponentList
+      parameters:
+        - name: framework
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+      tags:
+        - component-generation
+  /component-generation:
+    post:
+      operationId: generateAngularComponent
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AngularComponentPropertyDto"
+      responses:
+        "201":
+          description: ""
+        default:
+          description: ""
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+      tags:
+        - component-generation
+info:
+  title: Omega API
+  description: ""
+  version: 1.0.0
+  contact: {}
+tags: []
+servers: []
+components:
+  schemas:
+    InputDto:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+      required:
+        - name
+        - type
+    OutputDto:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+      required:
+        - name
+        - type
+    AttributeDto:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+      required:
+        - name
+        - value
+    BindingDto:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - innerText
+            - property
+            - twoWay
+            - event
+        from:
+          type: object
+        to:
+          type: object
+        toType:
+          type: string
+        toValue:
+          type: object
+      required:
+        - type
+    AngularBuildingBlockPropertyDto:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+        attributes:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttributeDto"
+        bindings:
+          type: array
+          items:
+            $ref: "#/components/schemas/BindingDto"
+        children:
+          default: []
+          type: array
+          items:
+            $ref: "#/components/schemas/AngularBuildingBlockPropertyDto"
+    AngularComponentPropertyDto:
+      type: object
+      properties:
+        componentName:
+          type: string
+          default: ""
+        export:
+          type: boolean
+        inputs:
+          type: array
+          items:
+            $ref: "#/components/schemas/InputDto"
+        outputs:
+          type: array
+          items:
+            $ref: "#/components/schemas/OutputDto"
+        children:
+          type: array
+          items:
+            $ref: "#/components/schemas/AngularBuildingBlockPropertyDto"
