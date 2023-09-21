@@ -27,6 +27,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { configurationKeys } from '../configuration.constant';
 import { AngularComponentPropertyDto } from './dto/angular-property-config.dto';
+import { ApiFileResponse } from 'src/utils/decorator';
 @ApiTags('component-generation')
 @Controller('component-generation')
 export class ComponentGenerationController {
@@ -47,14 +48,7 @@ export class ComponentGenerationController {
   }
 
   @Post()
-  @ApiBody({ type: AngularComponentPropertyDto })
-  @ApiResponse({
-    schema: {
-      type: 'string',
-      format: 'binary',
-    },
-  })
-  @ApiProduces('application/zip')
+  @ApiFileResponse('application/zip')
   async generateAngularComponent(
     @Body() config: AngularComponentPropertyDto,
     @Res({ passthrough: true }) res: ServerResponse,
