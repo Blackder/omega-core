@@ -10,6 +10,7 @@ import { BindingAndAttributeProvider } from './template-components/angular/bindi
 import { ConfigService } from '@nestjs/config';
 import { configurationKeys } from '../../configuration.constant';
 import { Injectable } from '@nestjs/common';
+import { AngularComponentPropertyDto } from '../dto/angular-property-config.dto';
 
 export interface FolderOutput {
   path: string;
@@ -24,13 +25,13 @@ export interface FileOutput {
 export const OutputProviderInjectionToken = 'OutputProvider';
 
 export interface OutputProvider {
-  getOutput(config: any):  Promise<FolderOutput>;
+  getOutput(config: any): Promise<FolderOutput>;
 }
 
 export class AngularOutputProvider implements OutputProvider {
   constructor(private selectorPrefix: string) {}
 
-  async getOutput(config: any): Promise<FolderOutput> {
+  async getOutput(config: AngularComponentPropertyDto): Promise<FolderOutput> {
     // The stuff that a component should import is irrelevant to the template and module import,
     // so we let the component build process use a separate ImportStatementCollection
     const componentBuildProcess = new AngularComponentBuildProcess(
@@ -61,18 +62,18 @@ export class AngularOutputProvider implements OutputProvider {
     const moduleContent = await moduleBuildProcess.build(config);
 
     return {
-      path: `./${config.name}`,
+      path: `./${config.componentName}`,
       files: [
         {
-          path: `${config.name}.component.ts`,
+          path: `${config.componentName}.component.ts`,
           content: componentContent,
         },
         {
-          path: `${config.name}.component.html`,
+          path: `${config.componentName}.component.html`,
           content: templateContent,
         },
         {
-          path: `${config.name}.module.ts`,
+          path: `${config.componentName}.module.ts`,
           content: moduleContent,
         },
       ],
@@ -84,19 +85,3 @@ const frameworks = {
   angular: 'angular',
   angularMaterial: 'angularMaterial',
 };
-
-@Injectable()
-export class OutputProviderResolver {
-  constructor(private configService: ConfigService) {}
-
-  resolve(config: any) {
-    switch (config.framework) {
-      case frameworks.angular:
-        return new AngularOutputProvider(
-          this.configService.get(configurationKeys.angular_selector_prefix),
-        );
-      default:
-        return null;
-    }
-  }
-}

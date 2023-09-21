@@ -5,11 +5,12 @@ import { BuildProcess } from '../build-process.service';
 import { ImportStatementCollection } from '../../importers/importer.service';
 import { formatHtml, formatTypescript } from '../../formatter.service';
 import { BindingType } from '../../template-components/angular/binding-and-attribute-provider';
+import { AngularBuildingBlockPropertyDto, AngularComponentPropertyDto, BindingDto } from 'src/component-generation/dto/angular-property-config.dto';
 
 export class AngularComponentBuildProcess implements BuildProcess {
   constructor(private builder: AngularComponentBuilder) {}
-  build(config: any): Promise<string> {
-    this.builder.setSelector(`${config.name}`);
+  build(config: AngularComponentPropertyDto): Promise<string> {
+    this.builder.setSelector(`${config.componentName}`);
 
     this.builder.import('Component', '@angular/core');
 
@@ -33,9 +34,7 @@ export class AngularComponentBuildProcess implements BuildProcess {
     }
 
     if (config.children) {
-      const bindings = config.children
-        .filter((c) => c.bindings)
-        .flatMap((c) => c.bindings);
+      const bindings = this.getAllBindings(config.children);
 
       for (const binding of bindings) {
         if (
@@ -58,6 +57,19 @@ export class AngularComponentBuildProcess implements BuildProcess {
 
     return Promise.resolve(this.builder.build());
   }
+
+  private getAllBindings(children: AngularBuildingBlockPropertyDto[]): BindingDto[] {
+    if (!children || children.length === 0) {
+      return [];
+    }
+
+    let result = children.flatMap(c => c.bindings);
+    for (const child of children) {
+      result = result.concat(this.getAllBindings(child.children));
+    }
+
+    return result;
+  }
 }
 
 export class AngularModuleBuildProcess implements BuildProcess {
@@ -66,12 +78,12 @@ export class AngularModuleBuildProcess implements BuildProcess {
     importStatementCollection.import('CommonModule', '@angular/common');
   }
 
-  async build(config: any): Promise<string> {
-    const moduleName = kebabToPascalCase(config.name);
+  async build(config: AngularComponentPropertyDto): Promise<string> {
+    const moduleName = kebabToPascalCase(config.componentName);
     const componentName = `${moduleName}Component`;
     this.importStatementCollection.import(
       componentName,
-      `./${config.name}.component.ts`,
+      `./${config.componentName}.component.ts`,
     );
 
     return await formatTypescript(`${this.importStatementCollection.getImportStatements()}
@@ -101,7 +113,7 @@ export class AngularTemplateBuildProcess implements BuildProcess {
     private importStatementCollection: ImportStatementCollection,
   ) {}
 
-  async build(config: any): Promise<string> {
+  async build(config: AngularComponentPropertyDto): Promise<string> {
     return await formatHtml(
       this.templateComponentResolver
         .get(config, this.importStatementCollection)

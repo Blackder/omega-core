@@ -5,17 +5,6 @@ export enum BindingType {
   event = 'event',
 }
 
-const nonAttributeKeys = [
-  'name',
-  'inputs',
-  'outputs',
-  'children',
-  'bindings',
-  'framework',
-  'export',
-  'innerHtml'
-];
-
 interface Binding {
   type: BindingType;
   from: any;
@@ -73,14 +62,18 @@ export class BindingAndAttributeProvider {
   }
 
   private getAttributes(config: any): string[] {
+    if (!config.attributes) {
+      return;
+    }
+
     const result = [];
 
-    for (const key in config) {
-      if (nonAttributeKeys.includes(key)) {
-        continue;
+    for (const attribute of config.attributes) {
+      if (attribute.value) {
+        result.push(`${attribute.name}="${attribute.value}"`);
+      } else {
+        result.push(`${attribute.name}`);
       }
-      const value = config[key];
-      result.push(`${key}=${value}`);
     }
 
     return result;

@@ -5,6 +5,7 @@ import AdmZip from 'adm-zip';
 import { ComponentGenerationModule } from './component-generation.module';
 import configModule from '../config.module';
 import { ServerResponse } from 'http';
+import { BindingType } from './services/template-components/angular/binding-and-attribute-provider';
 
 describe('ComponentGenerationController', () => {
   let controller: ComponentGenerationController;
@@ -30,15 +31,40 @@ describe('ComponentGenerationController', () => {
     });
   });
 
+  it('should return correct component list for Angular', () => {
+    const componentList = controller.getComponentList('angular');
+
+    expect(componentList).toEqual([
+      'custom-component',
+      'a',
+      'button',
+      'div',
+      'fieldset',
+      'form',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'img',
+      'input',
+      'label',
+      'li',
+      'p',
+      'span',
+      'ul',
+    ]);
+  });
+
   it('should generate correct zip file', async () => {
     const response: Partial<ServerResponse> = {
       setHeader: jest.fn().mockImplementation(),
     };
 
-    const file = await controller.generate(
+    const file = await controller.generateAngularComponent(
       {
-        framework: 'angular',
-        name: 'test-counter',
+        componentName: 'test-counter',
         export: true,
         inputs: [
           {
@@ -57,7 +83,7 @@ describe('ComponentGenerationController', () => {
             name: 'p',
             bindings: [
               {
-                type: 'innerText',
+                type: BindingType.innerText,
                 to: 'value',
                 toType: 'number',
               },
@@ -65,10 +91,10 @@ describe('ComponentGenerationController', () => {
           },
           {
             name: 'button',
-            innerHtml: 'Increase',
+            value: 'Increase',
             bindings: [
               {
-                type: 'event',
+                type: BindingType.event,
                 from: 'click',
                 to: 'increaseValue()',
               },
@@ -78,7 +104,7 @@ describe('ComponentGenerationController', () => {
             name: 'app-footer',
             bindings: [
               {
-                type: 'property',
+                type: BindingType.property,
                 from: 'text',
                 to: 'customText',
                 toType: 'string',
