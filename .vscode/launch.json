@@ -17,6 +17,20 @@
         "sourceMaps": true,
         "stopOnEntry": false,
         "console": "integratedTerminal",
+      },
+      {
+        "name": "Debug Jest Tests",
+        "type": "node",
+        "request": "launch",
+        "envFile": "${workspaceFolder}/environment/.env.development",
+        "runtimeArgs": [
+          "--experimental-vm-modules",
+          "--inspect-brk",
+          "${workspaceRoot}/node_modules/jest/bin/jest.js",
+          "--runInBand"
+        ],
+        "console": "integratedTerminal",
+        "internalConsoleOptions": "neverOpen"
       }
     ]
 }
