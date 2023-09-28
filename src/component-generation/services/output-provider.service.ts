@@ -32,32 +32,29 @@ export class AngularOutputProvider implements OutputProvider {
   constructor(private selectorPrefix: string) {}
 
   async getOutput(config: AngularComponentPropertyDto): Promise<FolderOutput> {
-    // The stuff that a component should import is irrelevant to the template and module import,
-    // so we let the component build process use a separate ImportStatementCollection
+    const moduleImportStatementCollection = new ImportStatementCollection();
+    const componentImportStatementCollection = new ImportStatementCollection();
     const componentBuildProcess = new AngularComponentBuildProcess(
       new DefaultAngularComponentBuilder(
         this.selectorPrefix,
-        new ImportStatementCollection(),
+        componentImportStatementCollection,
       ),
+      moduleImportStatementCollection,
+      componentImportStatementCollection,
     );
     const componentContent = await componentBuildProcess.build(config);
 
-    // The stuff that the module must import is relevant to what is used in the template,
-    // so they should share the same ImportStatementCollection,
-    // and we should build the template before the module
-    // to determine which other modules should be imported
-    const importStatementCollection = new ImportStatementCollection();
     const templateBuildProcess = new AngularTemplateBuildProcess(
       new AngularTemplateComponentResolver(
         this.selectorPrefix,
         new BindingAndAttributeProvider(),
       ),
-      importStatementCollection,
+      moduleImportStatementCollection,
     );
     const templateContent = await templateBuildProcess.build(config);
 
     const moduleBuildProcess = new AngularModuleBuildProcess(
-      importStatementCollection,
+      moduleImportStatementCollection,
     );
     const moduleContent = await moduleBuildProcess.build(config);
 

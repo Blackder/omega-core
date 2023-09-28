@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Header,
   Inject,
   Param,
   Post,
@@ -19,15 +18,12 @@ import { AngularOutputProvider } from './services/output-provider.service';
 import { ServerResponse } from 'http';
 import { ComponentProviderResolver } from './services/component-provider/component-provider-resolver.service';
 import {
-  ApiBody,
-  ApiProduces,
-  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { configurationKeys } from '../configuration.constant';
 import { AngularComponentPropertyDto } from './dto/angular-property-config.dto';
-import { ApiFileResponse } from 'src/utils/decorator';
+import { ApiFileResponse } from '../utils/decorator';
 @ApiTags('component-generation')
 @Controller('component-generation')
 export class ComponentGenerationController {
