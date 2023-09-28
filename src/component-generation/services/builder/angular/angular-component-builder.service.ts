@@ -7,7 +7,10 @@ import { kebabToPascalCase } from '../../../../utils/string.util';
 import { formatTypescript } from '../../formatter.service';
 
 class Input {
-  constructor(private name: string, private type: string) {}
+  constructor(
+    private name: string,
+    private type: string,
+  ) {}
 
   toString(): string {
     return `@Input() ${this.name}: ${this.type};`;
@@ -15,27 +18,59 @@ class Input {
 }
 
 class Output {
-  constructor(private name: string, private type: string) {}
+  constructor(
+    private name: string,
+    private type: string,
+  ) {}
 
   toString(): string {
     return `@Output() ${this.name}: ${this.type};`;
   }
 }
 
-class Variable {
-  constructor(private name: string, private type: string) {}
+class ConstructorParam {
+  constructor(
+    private name: string,
+    private type: string,
+    private accessModifier?: AccessModifier,
+  ) {}
 
   toString(): string {
-    return `${this.name}: ${this.type};`;
+    return `${this.accessModifier ? `${this.accessModifier} ` : ''}${
+      this.name
+    }: ${this.type}`;
   }
+}
+
+class Variable {
+  constructor(
+    private name: string,
+    private type: string,
+    private value?: string,
+  ) {}
+
+  toString(): string {
+    return `${this.name}: ${this.type}${this.value ? ` = ${this.value}` : ''};`;
+  }
+}
+
+export enum AccessModifier {
+  private = 'private',
+  protected = 'protected',
+  public = 'public',
 }
 
 export interface AngularComponentBuilder extends ComponentBuilder {
   setSelector(name: string): AngularComponentBuilder;
-  addVariable(name: string, type: string);
+  addVariable(name: string, type: string, value?: string);
   addFunction(fn: string);
   addInput(name: string, type: string): AngularComponentBuilder;
   addOutput(name: string, type: string): AngularComponentBuilder;
+  addConstructorParam(
+    name: string,
+    type: string,
+    accessModifier?: AccessModifier,
+  );
 }
 
 export class DefaultAngularComponentBuilder
@@ -46,6 +81,7 @@ export class DefaultAngularComponentBuilder
   private selector: string = '';
   private inputs: Input[] = [];
   private outputs: Output[] = [];
+  private constructorParams: ConstructorParam[] = [];
   private variables: Variable[] = [];
   private funcs: string[] = [];
 
@@ -65,6 +101,14 @@ export class DefaultAngularComponentBuilder
   private getOutputDeclaration(): string {
     return this.outputs.length > 0
       ? `${this.outputs.map((o) => o.toString()).join('\n')}\n`
+      : '';
+  }
+
+  private getConstructor(): string {
+    return this.constructorParams.length > 0
+      ? `constructor(${this.constructorParams
+          .map((p) => p.toString())
+          .join(',')}) {}`
       : '';
   }
 
@@ -89,6 +133,7 @@ export class ${this.className} {
   ${this.getInputDeclaration()}
   ${this.getOutputDeclaration()}
   ${this.getVariables()}
+  ${this.getConstructor()}
   ${this.getFunctions()}
 }
     `);
@@ -99,8 +144,8 @@ export class ${this.className} {
     return this;
   }
 
-  addVariable(name: string, type: string) {
-    this.variables.push(new Variable(name, type));
+  addVariable(name: string, type: string, value?: string) {
+    this.variables.push(new Variable(name, type, value));
   }
 
   addFunction(fn: string) {
@@ -138,5 +183,15 @@ export class ${this.className} {
   addOutput(name: string, type: string): AngularComponentBuilder {
     this.outputs.push(new Output(name, type));
     return this;
+  }
+
+  addConstructorParam(
+    name: string,
+    type: string,
+    accessModifier?: AccessModifier,
+  ) {
+    this.constructorParams.push(
+      new ConstructorParam(name, type, accessModifier),
+    );
   }
 }

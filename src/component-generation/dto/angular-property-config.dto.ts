@@ -3,7 +3,7 @@ import { BindingType } from '../services/template-components/angular/binding-and
 
 export class AttributeDto {
   name: string;
-  value: string;
+  value?: string;
 }
 
 export class InputDto {
