@@ -95,7 +95,6 @@ components:
           type: string
       required:
         - name
-        - value
     BindingDto:
       type: object
       properties:

@@ -1,8 +1,8 @@
 {
   "name": "omega-core",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "The server for the Omega app",
+  "author": "Nguyễn Vũ Như Long",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
