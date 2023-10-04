@@ -8,56 +8,54 @@ import { resolve } from 'path';
 import { escapeSpace } from './utils/path.utils';
 
 async function bootstrap() {
-  try {
-    const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule);
 
-    const configService = app.get<ConfigService>(ConfigService);
+  const configService = app.get<ConfigService>(ConfigService);
 
-    let fileAndClientGenerationOptions = {};
+  let fileAndClientGenerationOptions: any = {
+    clientGeneratorOptions: {
+      enabled: false,
+    },
+  };
 
-    if (!JSON.parse(configService.get(configurationKeys.in_production))) {
-      fileAndClientGenerationOptions = {
-        fileGeneratorOptions: {
-          enabled: true,
-          outputFilePath: './openapi.yaml',
-        },
-        clientGeneratorOptions: {
-          enabled: true,
-          type: 'typescript-angular',
-          // Change your .env.development api_client_folder_path to the correct path of your local environment web client
-          outputFolderPath: escapeSpace(
-            resolve(
-              configService.get(configurationKeys.api_client_folder_path),
-            ),
-          ),
-          additionalProperties:
-            'apiPackage=clients,modelPackage=models,withoutPrefixEnums=true,withSeparateModelsAndApi=true',
-          openApiFilePath: './openapi.yaml',
-        },
-      };
-    }
-
-    await OpenApiNestFactory.configure(
-      app,
-      new DocumentBuilder().setTitle('Omega API'),
-      {
-        webServerOptions: {
-          enabled: true,
-          path: 'api-docs',
-        },
-        ...fileAndClientGenerationOptions,
+  if (!JSON.parse(configService.get(configurationKeys.in_production))) {
+    fileAndClientGenerationOptions = {
+      fileGeneratorOptions: {
+        enabled: true,
+        outputFilePath: './openapi.yaml',
       },
-    );
-
-    app.enableCors({
-      origin: configService.get(configurationKeys.allow_origin),
-      exposedHeaders: configService.get(configurationKeys.exposed_headers),
-    });
-
-    await app.listen(3000);
-  } catch (error) {
-    console.error(error);
+      clientGeneratorOptions: {
+        enabled: true,
+        type: 'typescript-angular',
+        // Change your .env.development api_client_folder_path to the correct path of your local environment web client
+        outputFolderPath: escapeSpace(
+          resolve(configService.get(configurationKeys.api_client_folder_path)),
+        ),
+        additionalProperties:
+          'apiPackage=clients,modelPackage=models,withoutPrefixEnums=true,withSeparateModelsAndApi=true',
+        openApiFilePath: './openapi.yaml',
+      },
+    };
   }
+
+  await OpenApiNestFactory.configure(
+    app,
+    new DocumentBuilder().setTitle('Omega API'),
+    {
+      webServerOptions: {
+        enabled: true,
+        path: 'api-docs',
+      },
+      ...fileAndClientGenerationOptions,
+    },
+  );
+
+  app.enableCors({
+    origin: configService.get(configurationKeys.allow_origin),
+    exposedHeaders: configService.get(configurationKeys.exposed_headers),
+  });
+
+  await app.listen(3000);
 }
 
 bootstrap();
