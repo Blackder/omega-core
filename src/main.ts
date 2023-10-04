@@ -53,4 +53,9 @@ async function bootstrap() {
 
   await app.listen(3000);
 }
-bootstrap();
+
+try {
+  bootstrap();
+} catch (error) {
+  console.error(error);
+}
