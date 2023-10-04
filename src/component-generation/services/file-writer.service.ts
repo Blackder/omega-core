@@ -4,13 +4,14 @@ import { configurationKeys } from '../../configuration.constant';
 import { OutputProvider } from './output-provider.service';
 import { Injectable } from '@nestjs/common';
 import AdmZip from 'adm-zip';
-import { mkdirSync } from 'fs';
+import { v4 } from 'uuid';
+const fs = require('@cyclic.sh/s3fs');
 
 export const FileWriterInjectionToken = 'FileWriter';
 
 export interface FileWriter {
   // Zip and return the zipped file path
-  zipFile(provider: OutputProvider, config: any):  Promise<string>;
+  zipFile(provider: OutputProvider, config: any): Promise<string>;
 }
 
 @Injectable()
@@ -21,7 +22,7 @@ export class DefaultFileWriter implements FileWriter {
     this.outputFolderPath = configService.get(
       configurationKeys.downloadable_files_directory,
     );
-    mkdirSync(resolve(this.outputFolderPath), {
+    fs.mkdirSync(resolve(this.outputFolderPath), {
       recursive: true,
     });
   }
@@ -35,7 +36,7 @@ export class DefaultFileWriter implements FileWriter {
       zip.addFile(file.path, Buffer.from(file.content, 'utf8'));
     }
 
-    let zipOutput = `${basePath}.zip`;
+    let zipOutput = `${basePath}-${v4()}.zip`;
     zip.writeZip(zipOutput);
 
     return zipOutput;
