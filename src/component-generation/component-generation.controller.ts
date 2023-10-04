@@ -17,13 +17,13 @@ import { join } from 'path';
 import { AngularOutputProvider } from './services/output-provider.service';
 import { ServerResponse } from 'http';
 import { ComponentProviderResolver } from './services/component-provider/component-provider-resolver.service';
-import {
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { configurationKeys } from '../configuration.constant';
 import { AngularComponentPropertyDto } from './dto/angular-property-config.dto';
 import { ApiFileResponse } from '../utils/decorator';
+
+const fs = require('@cyclic.sh/s3fs');
 @ApiTags('component-generation')
 @Controller('component-generation')
 export class ComponentGenerationController {
@@ -61,6 +61,12 @@ export class ComponentGenerationController {
       config,
     );
     const file = createReadStream(join(process.cwd(), filePath));
+    file.on('end', () => {
+      fs.rmSync(filePath, {
+        recursive: true,
+        force: true,
+      });
+    });
     return Promise.resolve(new StreamableFile(file));
   }
 }
