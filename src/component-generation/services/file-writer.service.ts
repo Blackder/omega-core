@@ -5,7 +5,7 @@ import { OutputProvider } from './output-provider.service';
 import { Injectable } from '@nestjs/common';
 import AdmZip from 'adm-zip';
 import { v4 } from 'uuid';
-const fs = require('@cyclic.sh/s3fs');
+import { mkdirSync } from 'fs';
 
 export const FileWriterInjectionToken = 'FileWriter';
 
@@ -22,7 +22,7 @@ export class DefaultFileWriter implements FileWriter {
     this.outputFolderPath = configService.get(
       configurationKeys.downloadable_files_directory,
     );
-    fs.mkdirSync(resolve(this.outputFolderPath), {
+    mkdirSync(resolve(this.outputFolderPath), {
       recursive: true,
     });
   }

@@ -12,7 +12,7 @@ import {
   FileWriter,
   FileWriterInjectionToken,
 } from './services/file-writer.service';
-import { createReadStream } from 'fs';
+import { createReadStream, rmSync } from 'fs';
 import { join } from 'path';
 import { AngularOutputProvider } from './services/output-provider.service';
 import { ServerResponse } from 'http';
@@ -23,7 +23,6 @@ import { configurationKeys } from '../configuration.constant';
 import { AngularComponentPropertyDto } from './dto/angular-property-config.dto';
 import { ApiFileResponse } from '../utils/decorator';
 
-const fs = require('@cyclic.sh/s3fs');
 @ApiTags('component-generation')
 @Controller('component-generation')
 export class ComponentGenerationController {
@@ -62,7 +61,7 @@ export class ComponentGenerationController {
     );
     const file = createReadStream(join(process.cwd(), filePath));
     file.on('end', () => {
-      fs.rmSync(filePath, {
+      rmSync(filePath, {
         recursive: true,
         force: true,
       });
